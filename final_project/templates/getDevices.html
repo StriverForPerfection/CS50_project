@@ -1,0 +1,169 @@
+{%extends 'layout.html'%}
+
+devices = {{devices}}
+allIntruders = {{allIntruders}}
+signal = {{signal}}
+<!-- newIntruders = {{newIntruders}} -->
+
+{%block title%}
+Get LAN devices
+{%endblock%}
+
+{%block body%}
+
+    {%for message in get_flashed_messages()%}
+        <!-- Bootstrap -->
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>{{message}}</strong> 
+        </div>
+    {%endfor%}
+
+    <h1 style = "text-align: center;">Devices with access to this wifi</h1>
+    <table class = "table">
+        <!-- Print the device names -->
+
+        <!-- Aligning buttons to the right by making the parent element's position attribute realtive, and
+         the child's position attribute absolute, and finally determining the value of the child's position
+         credit: https://stackoverflow.com/questions/42579075/align-element-to-bottom-of-html-table-cell -->
+        {%for i in range (0, devices | count - 2, 3)%}
+        <tr>
+            <td style="position: relative;">{{(devices[i])["name"]}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(devices[i])['name']}}" name = "innocent" class = "form-check-input">
+                </span>
+            </td>
+            <td style="position: relative;">{{(devices[i + 1])["name"]}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(devices[i + 1])['name']}}" name = "innocent" class = "form-check-input">
+                </span>
+            </td>
+            <td style="position: relative;">{{(devices[i + 2])["name"]}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(devices[i + 2])['name']}}" name = "innocent" class = "form-check-input">
+                </span>
+            </td>
+        </tr>
+        {%endfor%}
+
+        <!-- Handle the case when the number of devices isn't divisible by 3 -->
+
+        {%if (devices | count) % 3 == 1 %}
+        <tr>
+            <td style="position: relative;">{{(devices[(devices | count) - 2])["name"]}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(devices[(devices | count) - 2])['name']}}" name = "innocent" class = "form-check-input">
+                </span>
+            </td>
+        </tr>
+        {%elif (devices | count) % 3 == 2 %}
+        <tr>
+            <td style="position: relative;">{{(devices[(devices | count) - 2])["name"]}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(devices[(devices | count) - 2])['name']}}" name = "innocent" class = "form-check-input">
+                </span>
+            </td>
+            <td style="position: relative;">{{(devices[(devices | count) - 1])["name"]}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(devices[(devices | count) - 1])['name']}}" name = "innocent" class = "form-check-input">
+                </span>
+            </td>
+        </tr>
+        {%endif%}
+    </table>
+
+    <form action = "/getDevices", method = "post" style="text-align: center;" id = "commit">
+        <!-- JS code in the script will write the names of selected devices in the input -->
+        <input type = "hidden" value = "" id = "intruders" name = "intruders">
+        <input type = "hidden" value = "" id = "innocents" name = "innocents">
+
+        <button type = submit style="align-items: center;" id = "commitbtn" class = "btn btn-primary"> Commit to database</button>
+        
+        <input type = "hidden" value = "" id = "newInnocents" name = "newInnocents">
+        <input type = "hidden" value = "" id = "newIntruders" name = "newIntruders">
+    </form>
+    <h6><i>When you commit <b>without</b> selecting any device, this means you aknowledge these devices and they won't
+        be considered intruders on future scans.
+    </i></h6>
+    
+    <hr>
+    <br>
+
+    <h1 style = "text-align: center;">Intruders</h1>
+    {%if (allIntruders | count) == 0%}
+        <br>
+        <h3 style="text-align: center;"> None</h3>
+    {%else%}
+
+    <table class = "table">
+        <!-- Print the device names -->
+
+        <!-- Aligning buttons to the right by making the parent element's position attribute realtive, and
+         the child's position attribute absolute, and finally determining the value of the child's position
+         credit: https://stackoverflow.com/questions/42579075/align-element-to-bottom-of-html-table-cell -->
+        {%for i in range (0, allIntruders | count - 2, 3)%}
+        <tr>
+            <td style="position: relative;">{{(allIntruders[i])}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(allIntruders[i])}}" name = "intruder" class = "form-check-input">
+                </span>
+            </td>
+            <td style="position: relative;">{{(allIntruders[i + 1])}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(allIntruders[i + 1])}}" name = "intruder" class = "form-check-input">
+                </span>
+            </td>
+            <td style="position: relative;">{{(allIntruders[i + 2])}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(allIntruders[i + 2])}}" name = "intruder" class = "form-check-input">
+                </span>
+            </td>
+        </tr>
+        {%endfor%}
+
+        <!-- Handle the case when the number of allIntruders isn't divisible by 3 -->
+
+        {%if (allIntruders | count) % 3 == 1 %}
+        <tr>
+            <td style="position: relative;">{{(allIntruders[(allIntruders | count) - 2])}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(allIntruders[(allIntruders | count) - 2])}}" name = "intruder" class = "form-check-input">
+                </span>
+            </td>
+        </tr>
+        {%elif (allIntruders | count) % 3 == 2 %}
+        <tr>
+            <td style="position: relative;">{{(allIntruders[(allIntruders | count) - 2])}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(allIntruders[(allIntruders | count) - 2])}}" name = "intruder" class = "form-check-input">
+                </span>
+            </td>
+            <td style="position: relative;">{{(allIntruders[(allIntruders | count) - 1])}}
+                <span style="display: inline-block; position: absolute; right: 0px;">
+                    <input type = "checkbox" style="padding-bottom: 0px;" value = "{{(allIntruders[(allIntruders | count) - 1])}}" name = "intruder" class = "form-check-input">
+                </span>
+            </td>
+        </tr>
+        {%endif%}
+    </table>
+
+    {%endif%}
+
+    <br>
+    <br>
+    <hr>
+<!-- print("New intruders are:", newIntruders)print("New intruders are:", newIntruders) -->
+    <h2 style="text-align: center;"> New Intruders!</h2>
+
+    <table class = "table" id = "newIntruders">
+        
+    </table>
+
+    <input type = "hidden" value = "{{signal}}" id = "toggleGuardian">
+    <button id = "alrtbtn">alertMe!!</button>
+    
+
+{%endblock%}
+
+{%block script%}
+    <script src = "static/js/getDevices.js"></script>
+{%endblock%}
