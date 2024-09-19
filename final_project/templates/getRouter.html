@@ -1,0 +1,30 @@
+{%extends 'layout.html'%}
+
+{%block title%}
+Get credentials
+{%endblock%}
+
+{%block body%}
+{%for message in get_flashed_messages()%}
+<!-- Bootstrap -->
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>{{message}}</strong> 
+</div>
+
+{%endfor%}
+    <h1 style = "text-align: center; padding: 5px;">Enter the name and password of your router</h1>
+    <h6 style = "text-align: center; padding: 3px;"><i>How can this app access the router otherwise? I am not a hacker</i></h1>
+    
+    <div style="display: flex; justify-content: center;">
+        <form action = "/storeCred", method="post" style="display: flex; flex-direction: column; align-items: center;">
+            <input type = "text" class = "form-control" autocomplete="off" name = "name" style="padding: 5px; margin: 5px;" autofocus required placeholder="Router username">
+            <input type = "text" class = "form-control" autocomplete="off" name = "password" style="padding: 5px; margin: 5px;" autofocus required placeholder="Router password">
+
+            <button id = "reg" class = "btn btn-primary" style="margin: 5px;">Register</button>   
+        </form> 
+    </div>
+{%endblock%}
+
+{%block script%}
+{%endblock%}
+

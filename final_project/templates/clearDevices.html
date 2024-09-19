@@ -1,0 +1,26 @@
+{%extends 'layout.html'%}
+
+{%block title%}
+Erase all devices
+{%endblock%}
+
+{%block body%}
+{%for message in get_flashed_messages()%}
+<!-- Bootstrap -->
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>{{message}}</strong> 
+</div>
+
+{%endfor%}
+    <h2 style = "text-align: center; padding: 5px;">Are you really sure you want to delete all the stored devices in the database??</h2>
+    <div style="display: flex; justify-content: center;">
+        <form action = "/clearDevices", method="post" style="display: flex; flex-direction: column; align-items: center">
+            <input type = "text" class = "form-control" autocomplete="off" name = "app password" style="margin: 5px;" autofocus required placeholder="Password">
+            <button id = "reg" class = "btn btn-primary" style="width: auto;">Confirm</button>   
+        </form> 
+    </div>
+{%endblock%}
+
+{%block script%}
+{%endblock%}
+
