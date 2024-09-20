@@ -340,10 +340,12 @@ def getDevices():
                     device = {}
                     device["name"] = i["name"]
                     inno.append(device)
+            if (cursor.execute("SELECT COUNT(*) FROM intruderDevices")).fetchone()[0] > 0:
                 intr = []
                 for i in (cursor.execute("SELECT * FROM intruderDevices")).fetchall():
                     intr.append(i["name"])
 
+            print(inno, intr, allIntruders, innocentDevices)
             flash("Acknowledged devices stored in database successfully!")
             return render_template("getDevices.html", devices = inno, allIntruders = intr, signal = 1)
 
@@ -523,6 +525,8 @@ def clearDevices():
         else:
             cursor.execute("DELETE FROM verifiedDevices")
             cursor.execute("DELETE FROM intruderDevices")
+            allIntruders.clear()
+            innocentDevices.clear()
 
             createDriver()
             driver.get("https://192.168.1.1")
