@@ -324,19 +324,6 @@ def getDevices():
             cursor.execute("CREATE TABLE IF NOT EXISTS intruderDevices(name TEXT NOT NULL DEFAULT 'fillerVeriDev')")
             connection.commit()
 
-            # newIntruders = (request.form.get("newIntruders")).strip().split(",")
-            # newInnocents = (request.form.get("newInnocents")).strip().split(",")
-
-
-            # for i in newIntruders:
-            #     if i not in allIntruders:
-            #         allIntruders.append(i)
-            # for i in newInnocents:
-            #     device = {}
-            #     device["name"] = i
-            #     if device not in innocentDevices:
-            #         innocentDevices.append(device)
-
             if (cursor.execute("SELECT COUNT(*) FROM verifiedDevices")).fetchone()[0] == 0:
                 for item in innocentDevices:
                     cursor.execute("INSERT INTO verifiedDevices (name) VALUES(?)", (item["name"], ))
