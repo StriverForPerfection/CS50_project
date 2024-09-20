@@ -38,10 +38,11 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-application-cache')
 options.add_argument('--disable-gpu')
 options.add_argument("--disable-dev-shm-usage")
+### Adding this activates the code without opening a browser tab
+# options.add_argument("headless")
 
 driver = None
 devices = [] # Array for LAN devices as a global array
-# tmpIntruders = [] # Devices with unsolicited access to the Wifi network per commit
 allIntruders = [] # Devices with unsolicited access to the Wifi network
 innocentDevices = [] # Devices allowed to access this wifi network
 
@@ -50,8 +51,10 @@ app.secret_key = "Very secret"
 # static_folder ensures your server can find static files
 
 def createDriver():
-    # app.firstTimeOnly_funcs[None].remove(createDriver) 
+
+    # app.firstTimeOnly_funcs[None].remove(createDriver) (**Not necessary now)
     #This ensures the driver is created only the first time the app is run, credits: https://stackoverflow.com/questions/73570041/flask-deprecated-before-first-request-how-to-update & Bing Copilot
+    
     global driver
     if driver is None:
         driver = webdriver.Edge(options=options)  # Initiate a driver object (instance of a browser, perhaps)
@@ -96,12 +99,10 @@ def register():
 def storeCred():
     if request.method == "POST":
         # You have to use a tuple to enter multiple variables #Credits: https://stackoverflow.com/questions/16856647/sqlite3-programmingerror-incorrect-number-of-bindings-supplied-the-current-sta
-        # print(request.form.get("name"), request.form.get("password"))
         cursor.execute("DROP TABLE IF EXISTS routerData")
         cursor.execute("CREATE TABLE IF NOT EXISTS routerData (name TEXT NOT NULL DEFAULT 'cat', password TEXT NOT NULL DEFAULT 'cat')")
         cursor.execute("INSERT INTO routerData(name, password) VALUES(?, ?)", (request.form.get("name"), request.form.get("password")))
         connection.commit()
-        # return render_template("getDevices.html")        
         return redirect("/getDevices")
     else:
         return render_template("getRouter.html")
@@ -116,7 +117,6 @@ def LogIn():
 
         if check_password_hash(storedPassword, password): # If the passwords match
             flash("Log in successful!")
-            # return render_template("getDevices.html")
             if cursor.execute("SELECT COUNT(*) FROM routerData").fetchone()[0] < 1:
                 return redirect("/storeCred")
             return redirect("/getDevices")
@@ -126,13 +126,10 @@ def LogIn():
     else:
         return render_template("login.html")
 
-### Create change password, routercredentials, intruders and alert for new intruders.
 @app.route("/getDevices", methods = ["Get", "Post"])
 
 def getDevices():
     global devices
-
-    ### driver is not defined
 
     if request.method == "POST":
         
@@ -154,13 +151,6 @@ def getDevices():
         for i in tmpInnocents:
             if i in allIntruders:
                 allIntruders.remove(i) # Remove devices made innocent from the intruder list
-
-
-        print("allIntruders:", allIntruders)
-        print("tHESE ARE INTRUDERS!", tmpIntruders)
-        print("These are now innocent:", tmpInnocents)
-        print("tmp intruders and innocents:",tmpIntruders, tmpInnocents)
-
 
         if tmpIntruders[0] != '' or tmpInnocents[0] != '': # On having no tmpintruders or tmpinnocents, it's a list containing "one" empty string
             createDriver()
@@ -190,7 +180,6 @@ def getDevices():
             loginbtn = driver.find_element(By.ID, "loginbtn")
             loginbtn.click()
 
-            # _ = WebDriverWait(driver, 10).until(lambda element: driver.find_element(By.ID, "homenetwork_settings_menu"))
             time.sleep(1.25)
 
             #  Go to LAN devices:
@@ -214,7 +203,7 @@ def getDevices():
 
             finally:
 
-                # Get the device names and their check boxes 
+                # Get the device names and their checkboxes 
 
                 # Click the "new time rule" link
                 newTimeRule = driver.find_element(By.ID, "macfilter_view_data_add_link")
@@ -225,21 +214,13 @@ def getDevices():
                 deviceNames = driver.find_elements(By.CSS_SELECTOR, "label[class='pull-left third_menu_below_config_font margintop_n3']")
                 checkboxes = driver.find_elements(By.CSS_SELECTOR, "input[type='checkbox']")
 
-                # print("checkboxes:", checkboxes)
-                # deviceNames = deviceNames[1:]
-
                 devices.clear()
                 for i in range(1, len(deviceNames)):
                     device = {}
                     device["name"] = (deviceNames[i].text).strip()
                     device["checkbox"] = checkboxes[i + 1]
-                    # print(device)
                     devices.append(device)
-                    # print(devices[i - 1])
-                # print(devices)
-
-                # time.sleep(100)
-
+             
                 # Check/select intruders Intruders:
 
                 for i in range(len(allIntruders)):
@@ -249,9 +230,8 @@ def getDevices():
                             break # No need for additional iterations
                 
                 # Set the upper time limit:
-
+                time.sleep(0.15)
                 uprTimeLimit = driver.find_element(By.CSS_SELECTOR, "input[class='ember-view ember-text-field time margintop_n3 marginleft_5']")
-                # print(uprTimeLimit.text)
                 uprTimeLimit.clear()
                 uprTimeLimit.send_keys("08:01") 
                 #   The upper time limit is only one minute larger than the lower limit, practically preventing intruders
@@ -262,8 +242,6 @@ def getDevices():
                 ruleName = driver.find_element(By.CSS_SELECTOR, "input[class='ie6widthbug']")
                 ruleName.send_keys("blockIntruders")
 
-                # time.sleep(100)
-
                 # Save the time rule:
                 saveButton = driver.find_element(By.ID, "macfilter_view_data_list_multiedit_submitctrl")
                 saveButton.click()
@@ -273,12 +251,13 @@ def getDevices():
 
                 for i in range(len(devices)): # Store the devices allowed to access the wifi network
                     if (devices[i])["name"] in allIntruders:
-                        # allIntruders.append((devices[i])["name"]) # Store the intruders this time in all intruders
                         continue # Don't store the intruder as an innocent device
                     innocentDevices.append(devices[i])
 
                 return render_template("getDevices.html", devices = innocentDevices, allIntruders = allIntruders)
-            # You shall go into this branch if you've exitted the application and reopened it to restore stored data.
+            
+
+        # You shall go into this branch if you've exitted the application and reopened it to restore stored data.
         elif (len(innocentDevices) == 0 and (cursor.execute("SELECT COUNT(*) FROM verifiedDevices")).fetchone()[0] > 0) or (len(allIntruders) == 0 and (cursor.execute("SELECT COUNT(*) FROM intruderDevices")).fetchone()[0] > 0):
             # This two important if statements ensure the innocentDevices and allIntruders arrays are populated even
             # when the user closes the web application.
@@ -289,7 +268,6 @@ def getDevices():
                     device = {}
                     device["name"] = i["name"]
                     innocentDevices.append(device)
-                    # print(i["name"], "quack")
 
             if len(allIntruders) == 0 and (cursor.execute("SELECT COUNT(*) FROM intruderDevices")).fetchone()[0] > 0:
                 for i in (cursor.execute("SELECT * FROM intruderDevices")).fetchall():
@@ -314,8 +292,6 @@ def getDevices():
                 cursor.execute("INSERT INTO intruderDevices (name) VALUES(?)", (item, ))
             connection.commit()
 
-            # print("innocents:", innocentDevices)
-            # flash("Acknowledged devices stored in database successfully!")
             return render_template("getDevices.html", devices=innocentDevices, allIntruders=allIntruders, signal = 1)
         
         # If the user doesn't choose any intruders
@@ -336,8 +312,6 @@ def getDevices():
             return render_template("getDevices.html", devices=devices)
 
         else:
-            flash("Acknowledged devices stored in database successfully!")
-
             # Reset databases on new changes
 
             # Store verified devices in database
@@ -350,18 +324,18 @@ def getDevices():
             cursor.execute("CREATE TABLE IF NOT EXISTS intruderDevices(name TEXT NOT NULL DEFAULT 'fillerVeriDev')")
             connection.commit()
 
-            newIntruders = (request.form.get("newIntruders")).strip().split(",")
-            newInnocents = (request.form.get("newInnocents")).strip().split(",")
+            # newIntruders = (request.form.get("newIntruders")).strip().split(",")
+            # newInnocents = (request.form.get("newInnocents")).strip().split(",")
 
 
-            for i in newIntruders:
-                if i not in allIntruders:
-                    allIntruders.append(i)
-            for i in newInnocents:
-                device = {}
-                device["name"] = i
-                if device not in innocentDevices:
-                    innocentDevices.append(device)
+            # for i in newIntruders:
+            #     if i not in allIntruders:
+            #         allIntruders.append(i)
+            # for i in newInnocents:
+            #     device = {}
+            #     device["name"] = i
+            #     if device not in innocentDevices:
+            #         innocentDevices.append(device)
 
             if (cursor.execute("SELECT COUNT(*) FROM verifiedDevices")).fetchone()[0] == 0:
                 for item in innocentDevices:
@@ -373,13 +347,12 @@ def getDevices():
                     cursor.execute("INSERT INTO intruderDevices (name) VALUES(?)", (item, ))
                 connection.commit()
 
-            if (cursor.execute("SELECT COUNT(*) FROM verifiedDevices")).fetchone()[0] > 0: # If verifiedDevices is not empty (will most probably occur after the app is first used)
+            if (cursor.execute("SELECT COUNT(*) FROM verifiedDevices")).fetchone()[0] > 0: # If verifiedDevices is not empty
                 inno = []
                 for i in (cursor.execute("SELECT * FROM verifiedDevices")).fetchall():
                     device = {}
                     device["name"] = i["name"]
                     inno.append(device)
-                    # print(i["name"], "quack")
                 intr = []
                 for i in (cursor.execute("SELECT * FROM intruderDevices")).fetchall():
                     intr.append(i["name"])
@@ -403,23 +376,16 @@ def getDevices():
             #     if i not in intr:
             #         intr.append(i)
 
-
-            print("ggg",inno, intr)
+            flash("Acknowledged devices stored in database successfully!")
             return render_template("getDevices.html", devices = inno, allIntruders = intr, signal = 1)
 
     else:
-        ### Using this activates the code without opening a browser tab
-        # settings = webdriver.EdgeOptions()
-        # settings.add_argument("headless")
-        # driver = webdriver.Edge(options=settings)
-
         if (cursor.execute("SELECT COUNT(*) FROM verifiedDevices")).fetchone()[0] > 0: # If verifiedDevices is not empty (will most probably occur after the app is first used)
             inno = []
             for i in (cursor.execute("SELECT * FROM verifiedDevices")).fetchall():
                 device = {}
                 device["name"] = i["name"]
                 inno.append(device)
-                # print(i["name"], "quack")
         
             intr = []
             for i in (cursor.execute("SELECT * FROM intruderDevices")).fetchall():
@@ -452,23 +418,12 @@ def getDevices():
         loginbtn = driver.find_element(By.ID, "loginbtn")
         loginbtn.click()
 
-        # _ = WebDriverWait(driver, 10).until(lambda element: driver.find_element(By.ID, "homenetwork_settings_menu"))
         time.sleep(0.5)
 
         #  Go to LAN devices:
         driver.get("https://192.168.1.1/html/advance.html#parent_control")
     
-        time.sleep(2.75) # Ensure the devices have loaded
-
-        # Get the device names and their check boxes 
-
-        # Open the "time rule" drop list ### For some reason, the code works without this block
-
-        # timeRuleDropList = driver.find_element(By.ID, "macfilter_title_ctrl" )
-        # print(timeRuleDropList.text)
-        # timeRuleDropList.click() # The 1st element is the one with text "time rule"
-        # time.sleep(0.5)
-
+        time.sleep(2.75) # Ensure the devices have loaded 
 
         # Click the "new time rule" link
         newTimeRule = driver.find_element(By.ID, "macfilter_view_data_add_link")
@@ -477,7 +432,6 @@ def getDevices():
         
         # Get the device names
         deviceNames = driver.find_elements(By.CSS_SELECTOR, "label[class='pull-left third_menu_below_config_font margintop_n3']")
-        # deviceNames = deviceNames[1:]
         
         devices.clear()
 
@@ -485,20 +439,7 @@ def getDevices():
             device = {}
             device["name"] = (deviceNames[i].text).strip()
             devices.append(device)
-        # print(devices)
-
-        # time.sleep(100)
-
-        # Populate the devices array with LAN devices and (their corresponding delete buttons => elements will become
-        # stale on page change, so I discarded doing this here)
-        # for i in range(0, len(deviceNames), 2):
-        #     device = {}
-        #     device["name"] = (deviceNames[i].text).split()[0]
-        #     # device["deleter"] = deviceDeletes[i]
-        #     devices.append(device)
-
-        # driver.get("https://192.168.1.1") # Return to the router's homepage after task completion.
-
+        
         return render_template("getDevices.html", devices = devices)
 
 
@@ -508,7 +449,7 @@ def changeRouter():
         if not check_password_hash(((cursor.execute("SELECT * FROM mainPassword")).fetchone())["password"], request.form.get("app password")):
             flash("The app password is incorrect!")
             return render_template("changeRouter.html")
-        else:
+        else: # Store router credentials in database
             name = request.form.get("router username")
             password = request.form.get("router password")
 
@@ -527,10 +468,10 @@ def changePassword():
         if not check_password_hash(((cursor.execute("SELECT * FROM mainPassword")).fetchone())["password"], request.form.get("old password")):
             flash("This isn't the old password!")
             return render_template("changePassword.html")
-        elif request.form.get("new password") != request.form.get("confirmation"):
+        elif request.form.get("new password") != request.form.get("confirmation"): # Passwords must match
             flash("Passwords don't match!")
             return render_template("changePassword.html")
-        else:
+        else: # Store new password in database
             cursor.execute("DELETE FROM mainPassword")
             cursor.execute("INSERT INTO mainPassword VALUES (?)", (generate_password_hash(request.form.get("new password")), ))
             connection.commit()
@@ -546,6 +487,7 @@ def detectIntruders():
     currentDevices = []
     currentDevices.clear()
     time.sleep(0.5)
+
     # LogIn page:
     # Get the name and password input fields on the login page
     name = driver.find_element(By.ID, "index_username")
@@ -583,7 +525,6 @@ def detectIntruders():
     
     # Get the device names
     deviceNames = driver.find_elements(By.CSS_SELECTOR, "label[class='pull-left third_menu_below_config_font margintop_n3']")
-    # deviceNames = deviceNames[1:]
     
     devices.clear()
 
@@ -601,12 +542,10 @@ def detectIntruders():
         tmpIntr.append(i["name"])
 
     for i in currentDevices:
-        if i not in tmpInno and i not in tmpIntr:
+        if i not in tmpInno and i not in tmpIntr: # If there's a device neither in innocent not intruder devices (never seen before), it's a new intruder
             newIntruders.append(i)
-
-    print("New intruders are:", newIntruders)
     
-    return jsonify(newIntruders)
+    return jsonify(newIntruders) # Jsonify ensures the page needn't refresh
 
 @app.route("/clearDevices" , methods = ["get", "post"])
 def clearDevices():
@@ -645,7 +584,6 @@ def clearDevices():
             loginbtn = driver.find_element(By.ID, "loginbtn")
             loginbtn.click()
 
-            # _ = WebDriverWait(driver, 10).until(lambda element: driver.find_element(By.ID, "homenetwork_settings_menu"))
             time.sleep(0.5)
 
             #  Go to LAN devices:
@@ -671,7 +609,6 @@ def clearDevices():
                 flash("Database and time rule cleared successfully")
                 return redirect("/")
             except:
-                print("No rule to delete, most probably.")
                 flash("Database cleared successfully")
                 return redirect("/")
     else:
