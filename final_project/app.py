@@ -39,7 +39,7 @@ options.add_argument('--disable-application-cache')
 options.add_argument('--disable-gpu')
 options.add_argument("--disable-dev-shm-usage")
 ### Adding this activates the code without opening a browser tab
-# options.add_argument("headless")
+options.add_argument("headless")
 
 driver = None
 devices = [] # Array for LAN devices as a global array
