@@ -359,7 +359,6 @@ def getDevices():
             for i in (cursor.execute("SELECT * FROM intruderDevices")).fetchall():
                 intr.append(i["name"])
 
-            
             return render_template("getDevices.html", devices = inno, allIntruders = intr, signal = 1)
         
         createDriver()
