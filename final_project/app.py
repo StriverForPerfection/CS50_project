@@ -357,25 +357,6 @@ def getDevices():
                 for i in (cursor.execute("SELECT * FROM intruderDevices")).fetchall():
                     intr.append(i["name"])
 
-            # # To handle when the innocents and inntruders change after commiting to database
-            # for i in innocentDevices:
-            #     if i not in inno:
-            #         inno.append(i)
-
-            # for i in allIntruders:
-            #     device = {}
-            #     device["name"] = i
-            #     if device in inno:
-            #         inno.remove(device)
-
-            # for i in innocentDevices:
-            #     if i["name"] in intr:
-            #         intr.remove(i["name"])
-
-            # for i in allIntruders:
-            #     if i not in intr:
-            #         intr.append(i)
-
             flash("Acknowledged devices stored in database successfully!")
             return render_template("getDevices.html", devices = inno, allIntruders = intr, signal = 1)
 
