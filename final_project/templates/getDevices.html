@@ -3,7 +3,6 @@
 devices = {{devices}}
 allIntruders = {{allIntruders}}
 signal = {{signal}}
-<!-- newIntruders = {{newIntruders}} -->
 
 {%block title%}
 Get LAN devices
@@ -81,8 +80,9 @@ Get LAN devices
         <input type = "hidden" value = "" id = "newInnocents" name = "newInnocents">
         <input type = "hidden" value = "" id = "newIntruders" name = "newIntruders">
     </form>
-    <h6><i>When you commit <b>without</b> selecting any device, this means you aknowledge these devices and they won't
-        be considered intruders on future scans.
+    <h6><i>When you commit <b>without</b> selecting any device from those with access or intruders,
+            this means you consent to storing these devices in the database. Consequently, the app can detect any
+            new devices as new intruders for you to take action then.
     </i></h6>
     
     <hr>
@@ -158,8 +158,13 @@ Get LAN devices
         
     </table>
 
+    <h6><i> Selecting a device from new intruders puts it with intruders after you click commit, and vice versa. 
+    </i></h6>
+    
+
+    <!-- This input lets the page know whether to ask for jsonified data about intruder scans -->
     <input type = "hidden" value = "{{signal}}" id = "toggleGuardian">
-    <button id = "alrtbtn">alertMe!!</button>
+
     
 
 {%endblock%}
