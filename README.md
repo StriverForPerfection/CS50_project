@@ -111,3 +111,4 @@ It's the database file that sqlite interacts with. It contains the following tab
 - If the app ever crashes or you can't find any devices in Get LAN devices (getDevices.html) just refersh the page, or go back and submit the last data you submitted again.
 - If the previous option doesn't work (less probable) and you feel something has messed up blatantly, you can always reset the devices from Clear devices. You'll be able to restore your previous configuration in a moment (it's a simple app), no worries!
 - If anything seems unclear, I hope the video demo can treat any confusion.
+- If you wonder why the "static" folder is repeated outside of templates, that's because I noticed the server could find those files when I placed them their. I tried to change that but haven't been able to do so for some reason.
