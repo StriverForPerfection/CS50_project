@@ -112,3 +112,4 @@ It's the database file that sqlite interacts with. It contains the following tab
 - If the previous option doesn't work (less probable) and you feel something has messed up blatantly, you can always reset the devices from Clear devices. You'll be able to restore your previous configuration in a moment (it's a simple app), no worries!
 - If anything seems unclear, I hope the video demo can treat any confusion.
 - If you wonder why the "static" folder is repeated outside of templates, that's because I noticed the server could find those files when I placed them their. I tried to change that but haven't been able to do so for some reason.
+- This app is designed to run on a device connected to a "we" router. it may or may not work for other internet providers in Egypt.
