@@ -7,7 +7,7 @@
 ## In the "templates" folder:
 
 ### Register.html:
-![image](https://github.com/user-attachments/assets/39287582-6498-46c1-9e9d-d358560cedbd)
+![image](https://github.com/user-attachments/assets/a52df35f-4ca5-4a1f-ade0-4363e500701d)
 
 It's the first page you'll see on opening the application. Inside it, you'll enter the **sole** password for the application. There's only one password for the application because it's assumed that only one person (you, in this case) will have access to the router settings. This is meant to avoid allwing any other user to register and alter anything you've done. 
 ###getRouter.html:
